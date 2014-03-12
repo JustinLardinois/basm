@@ -18,6 +18,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,11 +73,30 @@ void parse_args(int argc , char** argv)
 	else usage();
 }
 
+char* trim(char* s)
+{
+	if(isspace(s[0])) return trim(s+1);
+	else
+	{
+		int length = strlen(s);
+		for(int i = length -1; i >= 0; i--)
+		{
+			if(isspace(s[i])) s[i] = '\0';
+			else return s;
+		}
+	}
+	return s;
+}
+
 int main(int argc , char** argv)
 {
 	program_name = argv[0];
 	parse_args(argc,argv);
 	printf("input file: %s\n",input);
 	printf("output file: %s\n",output);
+	char test[1024];
+	sprintf(test,"           	dsafdwsfasd    	    ");
+	printf("test string: \"%s\"\n",test);
+	printf("trimmmed: \"%s\"\n",trim(test));
 	exit(EXIT_SUCCESS);
 }

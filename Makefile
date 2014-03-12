@@ -18,7 +18,7 @@
 # limitations under the License.
 ##########################################################################
 
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -std=c99
 RM = del
 
 all: basm.exe
@@ -31,4 +31,4 @@ basm.exe: main.o
 	gcc -o $@ $^
 
 main.o: main.c
-	gcc -c $< -o $@
+	gcc -c $< -o $@ ${CFLAGS}
