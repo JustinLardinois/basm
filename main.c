@@ -96,6 +96,15 @@ char* trim_comment(char* s)
 	return s;
 }
 
+char* make_lower(char* s)
+{
+	for(int i = 0; s[i] != '\0'; i++)
+	{
+		s[i] = tolower(s[i]);
+	}
+	return s;
+}
+
 int main(int argc , char** argv)
 {
 	program_name = argv[0];
