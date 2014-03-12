@@ -89,6 +89,13 @@ char* trim(char* s)
 	return s;
 }
 
+char* trim_comment(char* s)
+{
+	char* semicolon = strchr(s,';');
+	if(semicolon != NULL) semicolon = '\0';
+	return s;
+}
+
 int main(int argc , char** argv)
 {
 	program_name = argv[0];
