@@ -75,7 +75,8 @@ void parse_args(int argc , char** argv)
 
 char* trim(char* s)
 {
-	if(isspace(s[0])) return trim(s+1);
+	if(s[0] == '\0') return s;
+	else if(isspace(s[0])) return trim(s+1);
 	else
 	{
 		int length = strlen(s);
