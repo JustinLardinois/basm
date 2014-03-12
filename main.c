@@ -26,9 +26,30 @@
 
 #define OUTPUT_NAME_MAX_LENGTH 1024
 
+typedef unsigned char byte;
+
 char* program_name;
 char* input;
 char output[OUTPUT_NAME_MAX_LENGTH];
+
+char* ops[] = {
+	NULL ,
+	"and" ,
+	"not" ,
+	"or" ,
+	"mul" ,
+	"div" ,
+	"add" ,
+	"cmp" ,
+	"pop" ,
+	"swp" ,
+	"dup" ,
+	"ppc" ,
+	"get" ,
+	"put" ,
+	"br" ,
+	NULL
+};
 
 void usage()
 {
@@ -104,6 +125,8 @@ char* make_lower(char* s)
 	}
 	return s;
 }
+
+
 
 int main(int argc , char** argv)
 {
