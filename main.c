@@ -138,7 +138,7 @@ bool starts_with(char* s , char* substr)
 
 char* get_line(FILE* in , char* buffer)
 {
-	fgets(buffer,LINE_BUFFER_SIZE,in);
+	if(fgets(buffer,LINE_BUFFER_SIZE,in) == NULL) return NULL;
 	char* line = make_lower(trim(trim_comment(buffer)));
 	if(streq(line,"")) return get_line(in,buffer);
 	else return line;
