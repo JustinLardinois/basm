@@ -148,15 +148,12 @@ char* get_line(FILE* in , char* buffer)
 
 byte op_lookup(char* line , byte* immu)
 {
-	//printf("line: %s\n",line);
 	if(starts_with(line,"push"))
 	{
-		//printf("doing push\n");
 		char* operand = strchr(line,'#');
 		if(operand != NULL)
 		{
 			operand++;
-			//printf("operand: %s\n",operand);
 			int value;
 			if(sscanf(operand,"%d",&value) == 1)
 			{
@@ -198,7 +195,6 @@ void assemble(FILE* in , FILE* out)
 			{
 				lower_nibble = immu;
 				nibble = upper_nibble | lower_nibble;
-				printf("%x\n",nibble);
 				fwrite(&nibble,1,1,out);
 				upper_nibble = EMPTY;
 				lower_nibble = EMPTY;
@@ -208,7 +204,6 @@ void assemble(FILE* in , FILE* out)
 		{
 			lower_nibble = nibble;
 			nibble = upper_nibble | lower_nibble;
-			printf("%x\n",nibble);
 			fwrite(&nibble,1,1,out);
 			if(lower_nibble == 0) upper_nibble = immu << 4;
 			else upper_nibble = EMPTY;
@@ -217,7 +212,6 @@ void assemble(FILE* in , FILE* out)
 	}
 	if(upper_nibble != EMPTY)
 	{
-		printf("%x\n",upper_nibble);
 		fwrite(&upper_nibble,1,1,out);
 	}
 }
