@@ -35,6 +35,7 @@ char* program_name;
 char* input;
 char output[OUTPUT_NAME_MAX_LENGTH];
 
+// symbolic names of all BASIL opcodes, save for push which is a special case
 char* ops[] = {
 	NULL ,
 	"and" ,
@@ -65,6 +66,7 @@ bool streq(char* a , char* b)
 	return strcmp(a,b) == 0;
 }
 
+// figures out names of input and output files
 void parse_args(int argc , char** argv)
 {
 	if(argc == 2)
@@ -97,6 +99,7 @@ void parse_args(int argc , char** argv)
 	else usage();
 }
 
+// removes leading and trailing whitespace from a string
 char* trim(char* s)
 {
 	if(s[0] == '\0') return s;
@@ -113,6 +116,7 @@ char* trim(char* s)
 	return s;
 }
 
+// plugs comments (which start with a semicolon) with a null byte
 char* trim_comment(char* s)
 {
 	char* semicolon = strchr(s,';');
@@ -120,6 +124,7 @@ char* trim_comment(char* s)
 	return s;
 }
 
+// converts all characters in a string to lowercase
 char* make_lower(char* s)
 {
 	for(int i = 0; s[i] != '\0'; i++)
@@ -129,6 +134,7 @@ char* make_lower(char* s)
 	return s;
 }
 
+// checks if s begins with the contents of substr
 bool starts_with(char* s , char* substr)
 {
 	for(int i = 0;;i++)
@@ -138,6 +144,8 @@ bool starts_with(char* s , char* substr)
 	}
 }
 
+// reads an instruction line from the input file
+// lines consisting solely of whitespace and/or comments are skipped
 char* get_line(FILE* in , char* buffer)
 {
 	if(fgets(buffer,LINE_BUFFER_SIZE,in) == NULL) return NULL;
@@ -146,6 +154,8 @@ char* get_line(FILE* in , char* buffer)
 	else return line;
 }
 
+// returns the opcode for the symbolic instruction name passed in line
+// if the instruction was push, immu is set to the operand
 byte op_lookup(char* line , byte* immu)
 {
 	if(starts_with(line,"push"))
@@ -177,7 +187,7 @@ byte op_lookup(char* line , byte* immu)
 	exit(EXIT_FAILURE);
 }
 
-
+// collects nibbles and outputs them to the output file
 void assemble(FILE* in , FILE* out)
 {
 	char buffer[LINE_BUFFER_SIZE];
@@ -227,15 +237,22 @@ int main(int argc , char** argv)
 	setbuf(stdout,0);
 	program_name = argv[0];
 	parse_args(argc,argv);
-//	printf("input file: %s\n",input);
-//	printf("output file: %s\n",output);
-//	char test[1024];
-//	sprintf(test,"           	dsafdwsfasd    	    ");
-//	printf("test string: \"%s\"\n",test);
-//	printf("trimmmed: \"%s\"\n",trim(test));
 	FILE* in = fopen(input,"r");
 	if(in == NULL) die(input);
+	
+	
 	FILE* out = fopen(output,"wb");
+	// I had what was quite possibly the worst bug ever in this line.
+	// Apparently, "w" is not sufficient on non-Unix C89 implementations
+	// if you're writing binary data. You may wonder if people still use
+	// such archaic systems. I do; it's called Windows 8.1.
+	//
+	// My problem was that if the hex byte 0A was fwritten (which is PUSH #10
+	// in BASIL assembly) the byte 0D was written after it. After a lot of pain
+	// and tears, I discovered that since 0A is a line feed (\n), a carriage
+	// return (\r), which 0D represents, was being written after it. I solved
+	// the bug by using "wb" instead of "w", which writes literal bytes.
+	
 	if(out == NULL) die(output);
 	assemble(in,out);
 	fclose(in);
