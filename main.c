@@ -19,6 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -243,5 +244,7 @@ int main(int argc , char** argv)
 	FILE* out = fopen(output,"wb");
 	if(out == NULL) die(output);
 	assemble(in,out);
+	fclose(in);
+	fclose(out);
 	exit(EXIT_SUCCESS);
 }
