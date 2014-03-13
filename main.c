@@ -24,8 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OUTPUT_NAME_MAX_LENGTH 1024
+#define EMPTY 0xFF
 #define LINE_BUFFER_SIZE 1024
+#define OUTPUT_NAME_MAX_LENGTH 1024
 
 typedef unsigned char byte;
 
@@ -155,14 +156,17 @@ byte op_lookup(char* line , byte* immu)
 			int value;
 			if(sscanf(operand,"%d",&value) == 1)
 			{
-				*immu = value;
-				return 0;
+				if(value >= 0 || value <= 15)
+				{
+					*immu = value;
+					return 0;
+				}
 			}
 		}
 	}
 	else
 	{
-		for(int i = 1; i < 15; i++)
+		for(int i = 1; ops[i] != NULL; i++)
 		{
 			if(streq(line,ops[i])) return i;
 		}
@@ -175,8 +179,36 @@ byte op_lookup(char* line , byte* immu)
 void assemble(FILE* in , FILE* out)
 {
 	char buffer[LINE_BUFFER_SIZE];
-	char* line = get_line(in,buffer);
-	(void)in,(void)out,(void)line;
+	char* line;
+	byte upper_nibble = EMPTY;
+	byte lower_nibble = EMPTY;
+	while((line = get_line(in,buffer)) != NULL)
+	{
+		byte* immu = 0;
+		byte nibble = op_lookup(line,immu);
+		if(upper_nibble == EMPTY)
+		{
+			upper_nibble = nibble << 4;
+			if(nibble == 0)
+			{
+				lower_nibble = *immu;
+				nibble = upper_nibble | lower_nibble;
+				fwrite(&nibble,1,1,out);
+				upper_nibble = EMPTY;
+				lower_nibble = EMPTY;
+			}
+		}
+		else
+		{
+			lower_nibble = nibble;
+			nibble = upper_nibble | lower_nibble;
+			fwrite(&nibble,1,1,out);
+			if(lower_nibble == 0) upper_nibble = *immu << 4;
+			else upper_nibble = EMPTY;
+			lower_nibble = EMPTY;
+		}
+	}
+	if(upper_nibble != EMPTY) fwrite(&upper_nibble,1,1,out);
 }
 
 int main(int argc , char** argv)
