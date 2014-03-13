@@ -115,7 +115,7 @@ char* trim(char* s)
 char* trim_comment(char* s)
 {
 	char* semicolon = strchr(s,';');
-	if(semicolon != NULL) semicolon = '\0';
+	if(semicolon != NULL) *semicolon = '\0';
 	return s;
 }
 
@@ -147,17 +147,21 @@ char* get_line(FILE* in , char* buffer)
 
 byte op_lookup(char* line , byte* immu)
 {
+	//printf("line: %s\n",line);
 	if(starts_with(line,"push"))
 	{
+		//printf("doing push\n");
 		char* operand = strchr(line,'#');
 		if(operand != NULL)
 		{
 			operand++;
+			//printf("operand: %s\n",operand);
 			int value;
 			if(sscanf(operand,"%d",&value) == 1)
 			{
-				if(value >= 0 || value <= 15)
+				if(value >= 0 && value <= 15)
 				{
+
 					*immu = value;
 					return 0;
 				}
@@ -184,15 +188,16 @@ void assemble(FILE* in , FILE* out)
 	byte lower_nibble = EMPTY;
 	while((line = get_line(in,buffer)) != NULL)
 	{
-		byte* immu = 0;
-		byte nibble = op_lookup(line,immu);
+		byte immu = 0;
+		byte nibble = op_lookup(line,&immu);
 		if(upper_nibble == EMPTY)
 		{
 			upper_nibble = nibble << 4;
 			if(nibble == 0)
 			{
-				lower_nibble = *immu;
+				lower_nibble = immu;
 				nibble = upper_nibble | lower_nibble;
+				printf("%x\n",nibble);
 				fwrite(&nibble,1,1,out);
 				upper_nibble = EMPTY;
 				lower_nibble = EMPTY;
@@ -202,24 +207,41 @@ void assemble(FILE* in , FILE* out)
 		{
 			lower_nibble = nibble;
 			nibble = upper_nibble | lower_nibble;
+			printf("%x\n",nibble);
 			fwrite(&nibble,1,1,out);
-			if(lower_nibble == 0) upper_nibble = *immu << 4;
+			if(lower_nibble == 0) upper_nibble = immu << 4;
 			else upper_nibble = EMPTY;
 			lower_nibble = EMPTY;
 		}
 	}
-	if(upper_nibble != EMPTY) fwrite(&upper_nibble,1,1,out);
+	if(upper_nibble != EMPTY)
+	{
+		printf("%x\n",upper_nibble);
+		fwrite(&upper_nibble,1,1,out);
+	}
+}
+
+void die(char* file)
+{
+	fprintf(stderr,"%s: %s\n",file,strerror(errno));
+	exit(EXIT_FAILURE);
 }
 
 int main(int argc , char** argv)
 {
+	setbuf(stdout,0);
 	program_name = argv[0];
 	parse_args(argc,argv);
-	printf("input file: %s\n",input);
-	printf("output file: %s\n",output);
-	char test[1024];
-	sprintf(test,"           	dsafdwsfasd    	    ");
-	printf("test string: \"%s\"\n",test);
-	printf("trimmmed: \"%s\"\n",trim(test));
+//	printf("input file: %s\n",input);
+//	printf("output file: %s\n",output);
+//	char test[1024];
+//	sprintf(test,"           	dsafdwsfasd    	    ");
+//	printf("test string: \"%s\"\n",test);
+//	printf("trimmmed: \"%s\"\n",trim(test));
+	FILE* in = fopen(input,"r");
+	if(in == NULL) die(input);
+	FILE* out = fopen(output,"wb");
+	if(out == NULL) die(output);
+	assemble(in,out);
 	exit(EXIT_SUCCESS);
 }
