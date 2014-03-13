@@ -25,6 +25,7 @@
 #include <string.h>
 
 #define OUTPUT_NAME_MAX_LENGTH 1024
+#define LINE_BUFFER_SIZE 1024
 
 typedef unsigned char byte;
 
@@ -126,7 +127,36 @@ char* make_lower(char* s)
 	return s;
 }
 
+bool starts_with(char* s , char* substr)
+{
+	for(int i = 0;;i++)
+	{
+		if(substr[i] == '\0') return true;
+		else if(s[i] != substr[i]) return false;
+	}
+}
 
+char* get_line(FILE* in , char* buffer)
+{
+	fgets(buffer,LINE_BUFFER_SIZE,in);
+	char* line = make_lower(trim(trim_comment(buffer)));
+	if(streq(line,"")) return get_line(in,buffer);
+	else return line;
+}
+
+byte op_lookup(char* line)
+{
+	(void)line;
+	return 0;
+}
+
+
+void assemble(FILE* in , FILE* out)
+{
+	char buffer[LINE_BUFFER_SIZE];
+	char* line = get_line(in,buffer);
+	(void)in,(void)out,(void)line;
+}
 
 int main(int argc , char** argv)
 {
