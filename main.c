@@ -144,10 +144,31 @@ char* get_line(FILE* in , char* buffer)
 	else return line;
 }
 
-byte op_lookup(char* line)
+byte op_lookup(char* line , byte* immu)
 {
-	(void)line;
-	return 0;
+	if(starts_with(line,"push"))
+	{
+		char* operand = strchr(line,'#');
+		if(operand != NULL)
+		{
+			operand++;
+			int value;
+			if(sscanf(operand,"%d",&value) == 1)
+			{
+				*immu = value;
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		for(int i = 1; i < 15; i++)
+		{
+			if(streq(line,ops[i])) return i;
+		}
+	}
+	fprintf(stderr,"%s: invalid expression \"%s\"\n",input,line);
+	exit(EXIT_FAILURE);
 }
 
 
